@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import classification_report
-
+#pip install pandas numpy scikit-learn
 def importdata():
       balance_data=pd.read_csv("P5-balance-scale (1).data")
 
