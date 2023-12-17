@@ -1,49 +1,27 @@
 import numpy as np
 import pandas as pd
-import sklearn as sk
-from sklearn.metrics import confusion_matrix
-from sklearn.model_selection import train_test_split
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import classification_report
-#pip install pandas numpy scikit-learn
-def importdata():
-      balance_data=pd.read_csv("P5-balance-scale (1).data")
+from sklearn.preprocessing import LabelEncoder
+from sklearn import tree
+import matplotlib.pyplot as plt
 
-      print("Dataset Length : ",len(balance_data))
-      
-      print("Dataset : ",balance_data.head())
-      return balance_data
+df=pd.read_csv("ai/all_practical/ART/PlayTennis.csv")
+print(df)
 
-def splitdataset(balance_data):
-      X=balance_data.values[:,1:5]
-      Y=balance_data.values[:,0]
+Le=LabelEncoder()
+df['Outlook']=Le.fit_transform(df['Outlook'])
+df['Temperature']=Le.fit_transform(df['Temperature'])
+df['Humidity']=Le.fit_transform(df['Humidity'])
+df['Wind']=Le.fit_transform(df['Wind'])
+df['Play Tennis']=Le.fit_transform(df['Play Tennis'])
+print(df)
 
-      X_train,X_test,y_train,y_test=train_test_split(X,Y,test_size=0.3,random_state=100)
-      return X,Y,X_train,X_test,y_train,y_test
+y=df['Play Tennis']
+x=df.drop(['Play Tennis'],axis=1)
 
-def train_using_entropy(X_train,X_test,y_train,y_test):
-      clf_entropy=DecisionTreeClassifier(criterion="entropy",random_state=100,max_depth=3,min_samples_leaf=5)
-      clf_entropy.fit(X_train,y_train)
-      return clf_entropy
+clf=tree.DecisionTreeClassifier(criterion='entropy')
+clf=clf.fit(x,y)
 
-def prediction(X_test,clf_object):
-      y_pred=clf_object.predict(X_test)
-      print("Predicted Values : ")
-      print(y_pred)
-      return y_pred
+print(clf)
+print(tree.plot_tree(clf))
 
-def cal_accuracy(y_test,y_pred):
-      print("Accuracy : ",accuracy_score(y_test,y_pred)*100)
-
-def main():
-      data=importdata()
-      X,Y,X_train,X_test,y_train,y_test=splitdataset(data)
-      
-      clf_entropy=train_using_entropy(X_train,X_test,y_train,y_test)
-
-      print("Results using entropy : ")
-      y_pred_entropy=prediction(X_test,clf_entropy)
-      cal_accuracy(y_test,y_pred_entropy)
-
-main()
+plt.show()
