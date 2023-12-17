@@ -1,20 +1,17 @@
-import numpy as np
-import pandas as pd
+from sklearn.datasets import make_blobs
 import matplotlib.pyplot as plt
-from sklearn.svm import SVC
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
+import numpy as np
 
-data = pd.read_csv('iris.csv')
-X = data.drop('target', axis=1)
-y = data['target']
+x,y = make_blobs(n_samples=500, centers=2, random_state=0, cluster_std=0.40)
+plt.scatter(x[:,0],x[:,1],c=y,s=50,cmap='spring')
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+m,b,d=(1,0.65,0.33)
+xfit=np.linspace(-1,3.5)
 
-svm_classifier = SVC(kernel='linear')  
-svm_classifier.fit(X_train, y_train)
+yfit=m*xfit+b
+plt.plot(xfit,yfit, '-k')
 
-y_pred = svm_classifier.predict(X_test)
+plt.fill_between(xfit,yfit-d,yfit+d, edgecolor='none', color='#AAAAAA', alpha=0.4)
 
-accuracy = accuracy_score(y_test, y_pred)
-print(f"Accuracy: {accuracy:.2f}")
+plt.xlim(-1,3.5)
+plt.show()
