@@ -1,44 +1,58 @@
 import queue as Q
 
-start = 'A'
-goal = 'D'
-result = ''
+dict_hn={'Arad':336,'Bucharest':0,'Craiova':160,'Drobeta':242,'Eforie':161,
+'Fagaras':176,'Giurgiu':77,'Hirsova':151,'Iasi':226,'Lugoj':244,
+'Mehadia':241,'Neamt':234,'Oradea':380,'Pitesti':100,
+'Sibiu':253,'Timisoara':329,'Urziceni':80,'Vaslui':199,'Zerind':374}
+dict_gn=dict(
+Arad=dict(Zerind=75,Timisoara=118,Sibiu=140),
+Bucharest=dict(Urziceni=85,Giurgiu=90,Pitesti=101,Fagaras=211),
+Craiova=dict(Drobeta=120,Pitesti=138,),
+Drobeta=dict(Mehadia=75,Craiova=120),
+Eforie=dict(Hirsova=86),
+Fagaras=dict(Sibiu=99,Bucharest=211),
+Giurgiu=dict(Bucharest=90),
+Hirsova=dict(Eforie=86,Urziceni=98),
+Iasi=dict(Neamt=87,Vaslui=92),
+Lugoj=dict(Mehadia=70,Timisoara=111),
+Mehadia=dict(Lugoj=70,Drobeta=75),
+Neamt=dict(Iasi=87),
+Oradea=dict(Zerind=71,Sibiu=151),
+Pitesti=dict(Bucharest=101,Craiova=138),
+Sibiu=dict(Fagaras=99,Arad=140,Oradea=151),
+Timisoara=dict(Lugoj=111,Arad=118),
+Urziceni=dict(Bucharest=85,Hirsova=98,Vaslui=142),
+Vaslui=dict(Iasi=92,Urziceni=142),
+Zerind=dict(Oradea=71,Arad=75)
+)
 
-dict_hn = {'A': 20, 'B': 10, 'C': 5, 'D': 0}
+start = 'Arad'
+goal = 'Vaslui'
 
-dict_gn = {
-    'A': {'B': 10},
-    'B': {'C': 5, 'D': 10},
-    'C': {'D': 5},
-    'D': {}
-}
+result = []
 
-def get_fn(nodestr):
-    nodes = nodestr.split(" , ")
-    hn = gn = 0
-    for ctr in range(0, len(nodes)-1):
-        gn = gn + dict_gn[nodes[ctr]][nodes[ctr + 1]]
-    hn = dict_hn[nodes[len(nodes)-1]]
-    return hn + gn
+def expand(city, cityq, path_cost):
+    for neighbor, cost in dict_gn[city].items():
+        total_cost = path_cost + cost + dict_hn[neighbor]
+        cityq.put((total_cost, neighbor, total_cost - dict_hn[neighbor]))
 
-def expand(nodeq):
-    global result
-    tot, nodestr, thisnode = nodeq.get()
-    if thisnode == goal:
-        result = nodestr + " : : " + str(tot)
-        return
-    
-    for node in dict_gn[thisnode]:
-        nodeq.put((get_fn(nodestr + " , "+ node), nodestr + " , "+node, node))
-    
-    expand(nodeq)
+def astar_search(start, goal):
+    cityq = Q.PriorityQueue()
+    cityq.put((dict_hn[start], start, 0))
+
+    while not cityq.empty():
+        current_hn, current_city, current_cost = cityq.get()
+        result.append(current_city)
+
+        if current_city == goal:
+            print(f"The A* path is: {result}")
+            print(f"The total cost is: {current_cost}")
+            return
+
+        expand(current_city, cityq, current_cost)
 
 def main():
-    nodeq = Q.PriorityQueue()
-    thisnode = start
-    nodeq.put((get_fn(start), start, thisnode))
-    expand(nodeq)
-    print("The A* path with the total is: ")
-    print(result)
+    astar_search(start, goal)
 
-main()
+if __name__ == "__main__":
+    main()
