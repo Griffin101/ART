@@ -1,70 +1,47 @@
-from queue import PriorityQueue 
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import MultinomialNB, CategoricalNB, GaussianNB
+from sklearn.metrics import accuracy_score,confusion_matrix,precision_score,recall_score,f1_score,classification_report
+import seaborn as sns
+from sklearn.preprocessing import LabelEncoder
+import matplotlib.pyplot as plt 
+df=pd.read_csv("dieseases.csv")
+print(df)
+print(df.info())
+Le=LabelEncoder()
+df['sore throat']=Le.fit_transform(df['sore throat'])
 
-class Node:
-    def __init__(self, state, parent=None, f=float('inf')):
-        self.state = state
-        self.parent = parent
-        self.f = f
+df['fever']=Le.fit_transform(df['fever'])
+df['swallon']=Le.fit_transform(df['swallon'])
+df['Congestion ']=Le.fit_transform(df['Congestion '])
+df['headache']=Le.fit_transform(df['headache'])
+df['diagnosis']=Le.fit_transform(df['diagnosis'])
+print(df)
 
-def rbfs(start, goal):
-    f_limit = float('inf')
-    stack = [(Node(start, f=0), f_limit)]
-    visited = set()
+fig,ax=plt.subplots(figsize=(6,6))
+sns.countplot(x=df['sore throat'], data=df)
+plt.title("Sore throat")
+plt.xlabel("sore throat")
+plt.ylabel("count")
+plt.show()
 
-    while stack:
-        (node, f) = stack.pop()
-        visited.add(node.state)
 
-        if node.state == goal:
-            path = []
-            cost = node.f
-            while node is not None:
-                path.append(node.state)
-                node = node.parent
-            return list(reversed(path)), cost
+x=df.drop(['diagnosis'],axis=1)
+y=df['diagnosis']
 
-        successors = []
-        for neighbor, cost in get_neighbors(node.state):
-            if neighbor not in visited:
-                child = Node(neighbor, parent=node)
-                child.f = max(child.parent.f, cost)
-                successors.append(child)
+classifier = MultinomialNB()
+print(classifier.fit(x,y))
+classifier=CategoricalNB()
+print(classifier.fit(x,y))
+classifier=GaussianNB()
+print(classifier.fit(x,y))
 
-        if len(successors) == 0:
-            continue
-
-        successors.sort(key=lambda x: x.f)
-        best = successors[0]
-
-        if best.f > f_limit:
-            return None, best.f
-
-        alternative = successors[1].f if len(successors) > 1 else float('inf')
-        stack.append((best, min(f_limit, alternative)))
-
-    return None, float('inf')
-
-def get_neighbors(state):
-    # Define the successors for each state with their associated costs (simplified example).
-    successors = {
-        1: [(2, 3), (3, 5)],
-        2: [(1, 3), (4, 7)],
-        3: [(1, 5), (5, 2)],
-        4: [(2, 7), (6, 4)],
-        5: [(3, 2), (7, 6)],
-        6: [(4, 4), (8, 8)],
-        7: [(5, 6), (8, 5)],
-        8: [(6, 8), (7, 5)],
-    }
-    return successors.get(state, [])
-
-if __name__ == '__main__':
-    start_state = 1
-    goal_state = 8
-    path, cost = rbfs(start_state, goal_state)
-    if path is not None:
-        print(f"Optimal path from {start_state} to {goal_state}:")
-        print(" -> ".join(map(str, path)))
-        print(f"Total cost: {cost}")
-    else:
-        print("No path found.")
+x_train,x_test,y_train,y_test=train_test_split(x,y,test_size=0.2,random_state=42)
+classifier=MultinomialNB()
+classifier.fit(x_train,y_train)
+y_pred=classifier.predict(x_test)
+print("confusion matrix:",confusion_matrix(y_test,y_pred))
+print("accuracy_score:",accuracy_score(y_test,y_pred))
+print("precision score:",precision_score(y_test,y_pred))
+print("recall_score:",recall_score(y_test,y_pred))
+print(classification_report(y_test,y_pred))
